@@ -1,0 +1,5 @@
+parameters:
+    base_redirection_url: "http://127.0.0.1:8000"
+    redis_dsn: "redis://localhost"
+    redis_key_prefix: "pitchoun:"
+    secret: "ThisTokenIsNotSoSecretChangeIt"
