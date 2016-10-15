@@ -2,7 +2,7 @@
 
 namespace Tests\AppBundle\Service;
 
-use Predis;
+use M6Web\Component\RedisMock\RedisMockFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 use AppBundle\Exception\UrlNotFoundException;
@@ -23,7 +23,7 @@ class ShortenerTest extends KernelTestCase
     {
         static $factory = null;
         if ($factory === null) {
-            $factory = new \M6Web\Component\RedisMock\RedisMockFactory();
+            $factory = new RedisMockFactory();
         }
 
         $redis = $factory->getAdapter('Predis\Client', true);

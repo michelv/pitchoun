@@ -66,10 +66,9 @@ class Shortener
         $shortUri = $this->redis->get($key);
         if ($shortUri === null) {
             $shortUri = $this->uriProvider->getNextUri();
-            $this->redis->set($key, $shortUri);
-
             $reverseKey = sprintf('%slong:%s', $this->redisKeyPrefix, $shortUri);
-            $this->redis->set($reverseKey, $originalUrl);
+
+            $this->redis->pipeline()->set($key, $shortUri)->set($reverseKey, $originalUrl)->execute();
         }
 
         $url = new Url($originalUrl, $this->baseRedirectionUrl.$shortUri, $shortUri);

@@ -1,3 +1,17 @@
-app:
-    resource: "@AppBundle/Controller/"
-    type:     annotation
+web_redirect:
+    path: /{shortUri}
+    defaults: { _controller: app.web_controller:redirectAction }
+    requirements:
+        shortUri: "[a-z0-9]+/?"
+web_index:
+    path: /
+    methods: ["GET"]
+    defaults: { _controller: app.web_controller:indexAction }
+api_shorten:
+    path: /api/shorten
+    methods: ["GET", "POST"]
+    defaults: { _controller: app.api_controller:shortenAction }
+api_lengthen:
+    path: /api/lengthen
+    methods: ["GET", "POST"]
+    defaults: { _controller: app.api_controller:lengthenAction }
