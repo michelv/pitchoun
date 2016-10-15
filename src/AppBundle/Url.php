@@ -1,5 +1,7 @@
 <?php
 
+namespace AppBundle;
+
 class Url
 {
     /** @var string */

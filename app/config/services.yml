@@ -6,4 +6,7 @@ parameters:
 services:
     shortener:
         class: AppBundle\Service\Shortener
-        arguments: ["@snc_redis.default", "%base_redirection_url%", "%redis_key_prefix%"]
+        arguments: ["@snc_redis.default", "@uri_provider", %base_redirection_url%", "%redis_key_prefix%"]
+    uri_provider:
+        class: AppBundle\Service\UriProvider
+        arguments: ["@snc_redis.default", "%redis_key_prefix%"]
