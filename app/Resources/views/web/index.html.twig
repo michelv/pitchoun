@@ -1,23 +1,26 @@
 {% extends 'base.html.twig' %}
 
+{% block javascripts %}
+<script type="text/javascript" src="js/jquery/jquery.slim.min.js"></script>
+<script type="text/javascript" src="js/pitchoun.js"></script>
+{% endblock %}
+
 {% block body %}
 
-<div class="top-panel">
+<div id="top-panel">
     <header>
         <h1>pitchoun!</h1>
     </header>
 
-    <div class="main grid-3 has-gutter">
+    {{ form_start(form, {'attr': {'id': 'minify-form'}}) }}
+    <div id="main" class="grid-3 has-gutter">
         {% if uri is not null %}
-            <div class="result full">
+            <div id="result" class="full">
                 <p>You can now copy <label for="super-tiny-url">your short URL</label>!</p>
-                <form>
-                    <input type="text" id="super-tiny-url" name="result" readonly="readonly" value="{{ baseRedirectionUrl }}{{ uri }}">
-                </form>
+                <input type="text" id="super-tiny-url" name="result" readonly="readonly" value="{{ baseRedirectionUrl }}{{ uri }}">
             </div>
         {% endif %}
 
-        {{ form_start(form) }}
         <div class="full">
             {{ form_label(form.url) }}
             <div class="flash a-ah saviour-of-the-universe">
@@ -43,11 +46,11 @@
         <div>
             {{ form_widget(form.minify) }}
         </div>
-        {{ form_end(form) }}
     </div>
+    {{ form_end(form) }}
 </div>
 
-<div class="bottom-panel">
+<div id="bottom-panel">
     <footer>
         <dl>
             <dt>pitchoun <span class="pronounciation">(pit.ʃun)</span></dt>

@@ -40,10 +40,12 @@ class WebControllerTest extends KernelTestCase
 
         $router = static::$kernel->getContainer()->get('router');
         $templating = static::$kernel->getContainer()->get('templating');
+        $formFactory = static::$kernel->getContainer()->get('form.factory');
+        $session = static::$kernel->getContainer()->get('session');
 
         $uriProvider = new UriProvider($redis, '');
         $this->shortener = new Shortener($redis, $uriProvider, 'http://localhost');
-        $this->controller = new WebController($router, $templating, $this->shortener);
+        $this->controller = new WebController($router, $templating, $formFactory, $session, $this->shortener, 'http://localhost');
     }
 
     public function testRedirectAction()

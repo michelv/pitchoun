@@ -5,6 +5,7 @@ namespace AppBundle\Service;
 use Mso\IdnaConvert\IdnaConvert;
 use Predis;
 
+use AppBundle\Exception\UrlAlreadyShortenedException;
 use AppBundle\Exception\UrlNotFoundException;
 use AppBundle\Service\UriProvider;
 use AppBundle\Url;
@@ -60,6 +61,9 @@ class Shortener
     public function getShortUrl($originalUrl)
     {
         $originalUrl = $this->sanitizeUrl($originalUrl);
+        if (strpos($originalUrl, $this->baseRedirectionUrl) !== false) {
+            throw new UrlAlreadyShortenedException('Already shortened.');
+        }
 
         $key = sprintf('%sshort:%s', $this->redisKeyPrefix, $originalUrl);
 
@@ -93,14 +97,6 @@ class Shortener
         $url = new Url($originalUrl, $this->baseRedirectionUrl.$shortUri, $shortUri);
 
         return $url;
-    }
-
-    /**
-     * @param Url $url
-     * @param string $aliasUri
-     */
-    public function addAlias(Url $url, $aliasUri)
-    {
     }
 
     /**

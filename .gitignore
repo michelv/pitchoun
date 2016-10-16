@@ -17,6 +17,6 @@
 /vendor/
 /web/bundles/
 /web/css/*
-!web/css/.gitkeep
+!web/css/pitchoun.css
 /web/js/*
-!web/js/.gitkeep
+!web/js/pitchoun.js

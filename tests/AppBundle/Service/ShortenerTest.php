@@ -5,6 +5,7 @@ namespace Tests\AppBundle\Service;
 use M6Web\Component\RedisMock\RedisMockFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
+use AppBundle\Exception\UrlAlreadyShortenedException;
 use AppBundle\Exception\UrlNotFoundException;
 use AppBundle\Service\Shortener;
 use AppBundle\Service\UriProvider;
@@ -75,10 +76,37 @@ class ShortenerTest extends KernelTestCase
         $this->assertEquals('fragment', $parts['fragment']);
     }
 
+    public function testUrlAlreadyShortened()
+    {
+        $url = $this->shortener->getShortUrl('http://a.com/');
+
+        $this->expectException(UrlAlreadyShortenedException::class);
+        $url = $this->shortener->getShortUrl($url->short);
+    }
+
     public function testUrlNotFound()
     {
         $this->expectException(UrlNotFoundException::class);
         $url = $this->shortener->getFromShortUri('/youpi');
+    }
+
+    /**
+     * @dataProvider providerTestSanitizeUrl
+     */
+    public function testSanitizeUrl($originalUrl, $expectedUrl)
+    {
+        $url = $this->shortener->getShortUrl($originalUrl);
+        $this->assertEquals($expectedUrl, $url->original);
+    }
+
+    public function providerTestSanitizeUrl()
+    {
+        return array(
+            array('http://a.com/', 'http://a.com/'),
+            array('http://user:pass@a.com/', 'http://user:pass@a.com/'),
+            array('http://user@a.com/', 'http://user:@a.com/'),
+            array('a.com/', 'http://a.com/'),
+        );
     }
 
     /**
