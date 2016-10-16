@@ -2,6 +2,7 @@
 
 namespace AppBundle\Controller;
 
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,6 +12,8 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\EngineInterface;
 
+use AppBundle\Event\VisitorEvent;
+use AppBundle\Exception\UrlAlreadyShortenedException;
 use AppBundle\Exception\UrlNotFoundException;
 use AppBundle\Form\MinifyType;
 use AppBundle\Service\Shortener;
@@ -51,14 +54,16 @@ class WebController
      * @param RouterInterface $router
      * @param EngineInterface $templating
      * @param FormFactoryInterface $formFactory
+     * @param EventDispatcherInterface $event_dispatcher
      * @param SessionInterface $session
      * @param Shortener $shortener
      */
-    public function __construct(RouterInterface $router, EngineInterface $templating, FormFactoryInterface $formFactory, SessionInterface $session, Shortener $shortener, $baseRedirectionUrl)
+    public function __construct(RouterInterface $router, EngineInterface $templating, FormFactoryInterface $formFactory, EventDispatcherInterface $eventDispatcher, SessionInterface $session, Shortener $shortener, $baseRedirectionUrl)
     {
         $this->router = $router;
         $this->templating = $templating;
         $this->formFactory = $formFactory;
+        $this->eventDispatcher = $eventDispatcher;
         $this->session = $session;
         $this->shortener = $shortener;
         $this->baseRedirectionUrl = $baseRedirectionUrl;
@@ -96,6 +101,8 @@ class WebController
             try {
                 $shortUrl = $this->shortener->getShortUrl($data['url']);
                 $params = ['uri' => $shortUrl->shortUri, 'original' => $shortUrl->original];
+            } catch (UrlAlreadyShortenedException $e) {
+                $this->session->getFlashBag()->add('error', 'This URL is already shortened.');
             } catch (\InvalidArgumentException $e) {
                 $this->session->getFlashBag()->add('error', 'Invalid URL.');
             }
@@ -117,6 +124,10 @@ class WebController
         } catch (UrlNotFoundException $e) {
             throw new NotFoundHttpException();
         }
+
+        $event = new VisitorEvent();
+        $event->setRequest($request);
+        $this->eventDispatcher->dispatch('app.events.visitor', $event);
 
         $response = new RedirectResponse($url->original, 308, ['X-PS' => 'Thank you for using Pitchoun!']);
         $response->setCache(array(

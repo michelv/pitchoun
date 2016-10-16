@@ -15,4 +15,9 @@ services:
         arguments: ["@shortener", "%base_redirection_url%", "%secret"]
     app.web_controller:
         class: AppBundle\Controller\WebController
-        arguments: ["@router", "@templating", "@form.factory", "@session", "@shortener", "%base_redirection_url%"]
+        arguments: ["@router", "@templating", "@form.factory", "@event_dispatcher", "@session", "@shortener", "%base_redirection_url%"]
+    app.visitor_subscriber:
+        class: AppBundle\EventSubscriber\VisitorSubscriber
+        arguments: ["@snc_redis.default", "%redis_key_prefix%"]
+        tags:
+            - { name: kernel.event_subscriber }

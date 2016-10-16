@@ -1,9 +1,13 @@
 body {
-    background: #AA0010;
+    background: #E00049;
+}
+
+body, h1 {
+    font-family: "Trebuchet MS", Helvetica, sans-serif;
 }
 
 header {
-    color: #AA0010;
+    color: #E00049;
 }
 
 header, footer {
@@ -13,40 +17,68 @@ header, footer {
 }
 
 #top-panel {
-    background: #F5E283;
+    background: #F7F7EE;
     color: #3D1414;
-    padding-bottom: 80px;
+    padding: 24px 0 80px;
 }
 
 #bottom-panel {
-    background: #B17D31;
-    color: #FBFCD6;
+    background: #DB8C92;
+    color: #FEF9FA;
 }
 
 #main {
-    background: #FBFCD6;
+    background: #FFFFFF;
     max-width: 700px;
     margin: 0 auto;
     padding: 24px 48px;
+    border: 1px solid #E1E1DB;
 }
 
 #top-panel input, #top-panel button {
     font-size: 24px;
     width: 100%;
-    border-radius: 4px;
-    padding: 8px;
+    padding: 8px 16px;
 }
 
 #top-panel input {
-    border: 1px solid #F5E283;
+    border-style: solid;
+    border-width: 0 0 1px 0;
+    border-color: #CACAC2;
+    margin-bottom: 16px;
+}
+
+#top-panel input:focus {
+    border-color: #E00049;
 }
 
 #top-panel button {
-    background-color: #AA0010;
+    background-color: #E00049;
     color: #fff;
-    border: 2px solid #B17D31;
+    border: 1px solid #DB8C92;
+    border-radius: 4px;
 }
 
 #result {
     margin-bottom: 48px;
+}
+
+div.flash-error {
+    border: 1px solid #cc0000;
+    color: #cc0000;
+    padding: 8px 16px;
+    margin: 16px 0;
+    background-color: #ffaaaa;
+}
+
+#result p, #form label {
+    display: inline-block;
+    font-size: 1.3em;
+    padding: 0 8px 8px;
+}
+
+@media screen and (max-width: 550px) {
+    #top-panel input {
+        border-width: 1px;
+    }
 }

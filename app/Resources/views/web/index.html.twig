@@ -21,10 +21,10 @@
             </div>
         {% endif %}
 
-        <div class="full">
+        <div id="form" class="full">
             {{ form_label(form.url) }}
-            <div class="flash a-ah saviour-of-the-universe">
-                {% if app.request.hasPreviousSession %}
+            {% if app.request is not null and app.request.hasPreviousSession and app.session.flashBag.peekAll()|length > 0 %}
+                <div class="flash a-ah saviour-of-the-universe">
                     {% for flashMessage in app.session.flashBag.get('notice') %}
                         <div class="flash-notice">
                             {{ flashMessage }}
@@ -35,8 +35,8 @@
                             {{ flashMessage }}
                         </div>
                     {% endfor %}
-                {% endif %}
-            </div>
+                </div>
+            {% endif %}
         </div>
         <div class="two-thirds">
             {{ form_widget(form.url) }}

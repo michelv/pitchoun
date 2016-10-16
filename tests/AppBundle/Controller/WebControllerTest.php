@@ -41,38 +41,56 @@ class WebControllerTest extends KernelTestCase
         $router = static::$kernel->getContainer()->get('router');
         $templating = static::$kernel->getContainer()->get('templating');
         $formFactory = static::$kernel->getContainer()->get('form.factory');
-        $session = static::$kernel->getContainer()->get('session');
+        $event_dispatcher = static::$kernel->getContainer()->get('event_dispatcher');
+        $this->session = static::$kernel->getContainer()->get('session');
 
         $uriProvider = new UriProvider($redis, '');
         $this->shortener = new Shortener($redis, $uriProvider, 'http://localhost');
-        $this->controller = new WebController($router, $templating, $formFactory, $session, $this->shortener, 'http://localhost');
+        $this->controller = new WebController($router, $templating, $formFactory, $event_dispatcher, $this->session, $this->shortener, 'http://localhost');
+    }
+
+    public function testIndexAction()
+    {
+        $this->shortener->getShortUrl('http://a.com/');
+
+        $request = Request::create('/', 'GET');
+        $response = $this->controller->indexAction($request);
+
+        $this->assertFalse(strpos($response->getContent(), '<div id="result"'));
+
+        $request = Request::create('/', 'GET', ['uri' => '/1', 'original' => 'http://a.com/']);
+        $response = $this->controller->indexAction($request);
+
+        $this->assertNotFalse(strpos($response->getContent(), '<div id="result"'));
+    }
+
+    public function testShortenAction()
+    {
+    }
+
+    public function testShortenAlreadyShortenedUrl()
+    {
+    }
+
+    public function testShortenWithoutPost()
+    {
+        $request = Request::create('/', 'POST');
+        $response = $this->controller->shortenAction($request);
+
+        $this->assertEquals(1, count($this->session->getFlashBag()->get('error')));
     }
 
     public function testRedirectAction()
     {
         $this->shortener->getShortUrl('http://a.com/');
 
-        $request = $this->getRequest('web_redirect', [], ['shortUri' => 1], ['REQUEST_URI' => '/1']);
+        $request = Request::create('/1', 'GET');
         $response = $this->controller->redirectAction($request);
 
         $this->assertEquals(308, $response->getStatusCode());
 
-        $request = $this->getRequest('web_redirect', [], ['shortUri' => 42], ['REQUEST_URI' => '/42']);
+        $request = Request::create('/42', 'GET');
         $this->expectException(NotFoundHttpException::class);
         $response = $this->controller->redirectAction($request);
-    }
-
-    protected function getRequest($route, array $get, array $route_params = array(), array $server = array())
-    {
-        $server = array_merge([
-            'SERVER_NAME' => 'localhost',
-            'HOST' => 'localhost',
-        ], $server);
-        $attributes = [
-            '_route_params' => $route_params,
-            '_route' => $route,
-        ];
-
-        return new Request($get, $post = array(), $attributes, $cookies = array(), $files = array(), $server, $content = null);
     }
 }

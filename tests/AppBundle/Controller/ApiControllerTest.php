@@ -42,7 +42,7 @@ class ApiControllerTest extends KernelTestCase
 
     public function testShortenAction()
     {
-        $request = $this->getRequest('api_shorten', ['url' => 'http://a.com/']);
+        $request = Request::create('/api/shorten', 'GET', ['url' => 'http://a.com/']);
         $response = $this->controller->shortenAction($request);
         $first_content = $response->getContent();
         $etag = $response->headers->get('etag');
@@ -53,17 +53,17 @@ class ApiControllerTest extends KernelTestCase
         $this->assertEquals($first_content, $second_content);
         $this->assertNotNull($etag);
 
-        $request = $this->getRequest('api_shorten', ['url' => 'http://a.com/'], [], ['HTTP_If-None-Match' => $etag]);
+        $request = Request::create('/api/shorten', 'GET', ['url' => 'http://a.com/'], [], [], ['HTTP_If-None-Match' => $etag]);
         $response = $this->controller->shortenAction($request);
 
         $this->assertEquals(304, $response->getStatusCode());
 
-        $request = $this->getRequest('api_shorten', ['url' => 'http://b.com/'], [], ['HTTP_If-None-Match' => $etag]);
+        $request = Request::create('/api/shorten', 'GET', ['url' => 'http://b.com/'], [], [], ['HTTP_If-None-Match' => $etag]);
         $response = $this->controller->shortenAction($request);
 
         $this->assertEquals(200, $response->getStatusCode());
 
-        $request = $this->getRequest('api_shorten', ['url' => 'telnet://a.com/']);
+        $request = Request::create('/api/shorten', 'GET', ['url' => 'telnet://a.com/']);
         $response = $this->controller->shortenAction($request);
 
         $this->assertEquals(400, $response->getStatusCode());
@@ -73,40 +73,26 @@ class ApiControllerTest extends KernelTestCase
     {
         $this->shortener->getShortUrl('http://a.com/');
 
-        $request = $this->getRequest('api_lengthen', ['url' => 'http://localhost/1']);
+        $request = Request::create('/api/lengthen', 'GET', ['url' => 'http://localhost/1']);
         $response = $this->controller->lengthenAction($request);
         $first_content = $response->getContent();
         $etag = $response->headers->get('etag');
 
         $this->assertNotNull($etag);
 
-        $request = $this->getRequest('api_lengthen', ['url' => 'http://localhost/1'], [], ['HTTP_If-None-Match' => $etag]);
+        $request = Request::create('/api/lengthen', 'GET', ['url' => 'http://localhost/1'], [], [], ['HTTP_If-None-Match' => $etag]);
         $response = $this->controller->lengthenAction($request);
 
         $this->assertEquals(304, $response->getStatusCode());
 
-        $request = $this->getRequest('api_lengthen', ['url' => 'http://localhost/42'], [], ['HTTP_If-None-Match' => $etag]);
+        $request = Request::create('/api/lengthen', 'GET', ['url' => 'http://localhost/42'], [], [], ['HTTP_If-None-Match' => $etag]);
         $response = $this->controller->lengthenAction($request);
 
         $this->assertEquals(404, $response->getStatusCode());
 
-        $request = $this->getRequest('api_lengthen', ['url' => 'http://otherhost/1']);
+        $request = Request::create('/api/lengthen', 'GET', ['url' => 'http://otherhost/1']);
         $response = $this->controller->lengthenAction($request);
 
         $this->assertEquals(400, $response->getStatusCode());
-    }
-
-    protected function getRequest($route, array $get, array $route_params = array(), $server = array())
-    {
-        $server = array_merge([
-            'SERVER_NAME' => 'localhost',
-            'HOST' => 'localhost',
-        ], $server);
-        $attributes = [
-            '_route_params' => $route_params,
-            '_route' => $route,
-        ];
-
-        return new Request($get, $post = array(), $attributes, $cookies = array(), $files = array(), $server, $content = null);
     }
 }

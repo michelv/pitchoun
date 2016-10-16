@@ -106,32 +106,21 @@ class Shortener
      */
     protected function sanitizeUrl($originalUrl)
     {
-        if (!preg_match('#[a-zA-Z0-9]#', $originalUrl)) {
-            throw new \InvalidArgumentException('Invalid URL.');
+        if (!preg_match("#^[\w]+://#", $originalUrl)) {
+            $originalUrl = 'http://'.$originalUrl;
+        }
+
+        if (
+            !filter_var($originalUrl, FILTER_VALIDATE_URL)
+            && !filter_var($this->idnaConverter->encodeUri($originalUrl), FILTER_VALIDATE_URL)
+        ) {
+            throw new \InvalidArgumentException('Invalid URL1.');
         }
 
         $parts = parse_url(trim($originalUrl));
 
-        if (!isset($parts['scheme'])) {
-            $parts['scheme'] = 'http';
-        } elseif (!in_array(strtolower($parts['scheme']), static::VALID_URL_SCHEMES) || !isset($parts['host'])) {
-            throw new \InvalidArgumentException('Invalid URL.');
-        }
-
-        if (empty($parts['host'])) {
-            if (!empty($parts['path']) && strpos($parts['path'], '/') !== 0) {
-                // special case, parse_url('a.com') says there is no host and that a.com is the path
-                $pos = strpos($parts['path'], '/');
-                if ($pos !== false) {
-                    $parts['host'] = substr($parts['path'], 0, $pos);
-                    $parts['path'] = substr($parts['path'], $pos);
-                } else {
-                    $parts['host'] = $parts['path'];
-                    unset($parts['path']);
-                }
-            } else {
-                throw new \InvalidArgumentException('Invalid URL.');
-            }
+        if (!in_array(strtolower($parts['scheme']), static::VALID_URL_SCHEMES) || !isset($parts['host'])) {
+            throw new \InvalidArgumentException('Invalid URL2.');
         }
 
         $credentials = '';
@@ -153,7 +142,7 @@ class Shortener
             strtolower($parts['scheme']),
             ($credentials !== '' ? $credentials.'@' : ''),
             $host,
-            (isset($parts['port']) ? $parts['port'] : ''),
+            (isset($parts['port']) ? ':'.$parts['port'] : ''),
             (isset($parts['path']) ? $parts['path'] : ''),
             (isset($parts['query']) ? '?'.$parts['query'] : ''),
             (isset($parts['fragment']) ? '#'.$parts['fragment'] : '')

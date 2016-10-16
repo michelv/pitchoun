@@ -106,6 +106,7 @@ class ShortenerTest extends KernelTestCase
             array('http://user:pass@a.com/', 'http://user:pass@a.com/'),
             array('http://user@a.com/', 'http://user:@a.com/'),
             array('a.com/', 'http://a.com/'),
+            array('http://a.com:8000/', 'http://a.com:8000/'),
         );
     }
 
@@ -127,6 +128,8 @@ class ShortenerTest extends KernelTestCase
             array('#down'),
             array(''),
             array('!'),
+            array('-'),
+            array(':42'),
         );
     }
 }
