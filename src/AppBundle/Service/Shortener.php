@@ -40,12 +40,12 @@ class Shortener
     const VALID_URL_SCHEMES = ['http', 'https', 'ftp'];
 
     /**
-     * @param Predis\Client $redis
+     * @param Predis\ClientInterface $redis
      * @param UriProvider $uriProvider
      * @param string $baseRedirectionUrl
      * @param string $redisKeyPrefix
      */
-    public function __construct(Predis\Client $redis, UriProvider $uriProvider, $baseRedirectionUrl, $redisKeyPrefix = '')
+    public function __construct(Predis\ClientInterface $redis, UriProvider $uriProvider, $baseRedirectionUrl, $redisKeyPrefix = '')
     {
         $this->redis = $redis;
         $this->uriProvider = $uriProvider;

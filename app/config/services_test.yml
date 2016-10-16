@@ -1,10 +1,16 @@
+parameters:
+    base_redirection_url: "http://localhost"
+    redis_key_prefix: ''
+
 services:
+    app.redis_mock:
+        class: AppBundle\Service\RedisMock
     shortener:
         class: AppBundle\Service\Shortener
-        arguments: ["@snc_redis.default", "@uri_provider", "%base_redirection_url%", "%redis_key_prefix%"]
+        arguments: ["@app.redis_mock", "@uri_provider", "%base_redirection_url%", "%redis_key_prefix%"]
     uri_provider:
         class: AppBundle\Service\UriProvider
-        arguments: ["@snc_redis.default", "%redis_key_prefix%"]
+        arguments: ["@app.redis_mock", "%redis_key_prefix%"]
     app.api_controller:
         class: AppBundle\Controller\ApiController
         arguments: ["@shortener", "%base_redirection_url%", "%secret"]
@@ -13,6 +19,6 @@ services:
         arguments: ["@router", "@templating", "@form.factory", "@event_dispatcher", "@session", "@shortener", "%base_redirection_url%"]
     app.visitor_subscriber:
         class: AppBundle\EventSubscriber\VisitorSubscriber
-        arguments: ["@snc_redis.default", "%redis_key_prefix%"]
+        arguments: ["@app.redis_mock", "%redis_key_prefix%"]
         tags:
             - { name: kernel.event_subscriber }

@@ -2,14 +2,11 @@
 
 namespace Tests\AppBundle\Controller;
 
-use M6Web\Component\RedisMock\RedisMockFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 
 use AppBundle\Controller\ApiController;
 use AppBundle\Exception\UrlNotFoundException;
-use AppBundle\Service\Shortener;
-use AppBundle\Service\UriProvider;
 
 class ApiControllerTest extends KernelTestCase
 {
@@ -28,15 +25,9 @@ class ApiControllerTest extends KernelTestCase
      */
     public function setUp()
     {
-        static $factory = null;
-        if ($factory === null) {
-            $factory = new RedisMockFactory();
-        }
+        static::bootKernel();
 
-        $redis = $factory->getAdapter('Predis\Client', true);
-
-        $uriProvider = new UriProvider($redis, '');
-        $this->shortener = new Shortener($redis, $uriProvider, 'http://localhost');
+        $this->shortener = static::$kernel->getContainer()->get('shortener');
         $this->controller = new ApiController($this->shortener, 'http://localhost', 'secret');
     }
 

@@ -2,15 +2,12 @@
 
 namespace Tests\AppBundle\Controller;
 
-use M6Web\Component\RedisMock\RedisMockFactory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use AppBundle\Controller\WebController;
 use AppBundle\Exception\UrlNotFoundException;
-use AppBundle\Service\Shortener;
-use AppBundle\Service\UriProvider;
 
 class WebControllerTest extends KernelTestCase
 {
@@ -29,23 +26,14 @@ class WebControllerTest extends KernelTestCase
      */
     public function setUp()
     {
-        static $factory = null;
-        if ($factory === null) {
-            $factory = new RedisMockFactory();
-        }
-
         static::bootKernel();
-
-        $redis = $factory->getAdapter('Predis\Client', true);
 
         $router = static::$kernel->getContainer()->get('router');
         $templating = static::$kernel->getContainer()->get('templating');
         $formFactory = static::$kernel->getContainer()->get('form.factory');
         $event_dispatcher = static::$kernel->getContainer()->get('event_dispatcher');
         $this->session = static::$kernel->getContainer()->get('session');
-
-        $uriProvider = new UriProvider($redis, '');
-        $this->shortener = new Shortener($redis, $uriProvider, 'http://localhost');
+        $this->shortener = static::$kernel->getContainer()->get('shortener');
         $this->controller = new WebController($router, $templating, $formFactory, $event_dispatcher, $this->session, $this->shortener, 'http://localhost');
     }
 
