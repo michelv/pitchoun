@@ -1,0 +1,13 @@
+{
+  "name": "pitchoun",
+  "version": "0.0.1",
+  "author": "Michel Valdrighi <michelv@gmail.com>",
+  "private": true,
+  "dependencies": {
+    "jquery": "^3.0",
+    "knacss": "^6.0"
+  },
+  "scripts": {
+    "postinstall": "bin/npm-postinstall.sh"
+  }
+}
