@@ -15,4 +15,4 @@ services:
         arguments: ["@shortener", "%base_redirection_url%", "%secret"]
     app.web_controller:
         class: AppBundle\Controller\WebController
-        arguments: ["@router", "@templating", "@shortener"]
+        arguments: ["@router", "@templating", "@form.factory", "@session", "@shortener", "%base_redirection_url%"]

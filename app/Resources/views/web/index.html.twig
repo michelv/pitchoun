@@ -1,0 +1,59 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+
+<div class="top-panel">
+    <header>
+        <h1>pitchoun!</h1>
+    </header>
+
+    <div class="main grid-3 has-gutter">
+        {% if uri is not null %}
+            <div class="result full">
+                <p>You can now copy <label for="super-tiny-url">your short URL</label>!</p>
+                <form>
+                    <input type="text" id="super-tiny-url" name="result" readonly="readonly" value="{{ baseRedirectionUrl }}{{ uri }}">
+                </form>
+            </div>
+        {% endif %}
+
+        {{ form_start(form) }}
+        <div class="full">
+            {{ form_label(form.url) }}
+            <div class="flash a-ah saviour-of-the-universe">
+                {% if app.request.hasPreviousSession %}
+                    {% for flashMessage in app.session.flashBag.get('notice') %}
+                        <div class="flash-notice">
+                            {{ flashMessage }}
+                        </div>
+                    {% endfor %}
+                    {% for flashMessage in app.session.flashBag.get('error') %}
+                        <div class="flash-error">
+                            {{ flashMessage }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+        <div class="two-thirds">
+            {{ form_widget(form.url) }}
+            <div class="errors">
+            </div>
+        </div>
+        <div>
+            {{ form_widget(form.minify) }}
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+<div class="bottom-panel">
+    <footer>
+        <dl>
+            <dt>pitchoun <span class="pronounciation">(pit.ʃun)</span></dt>
+            <dd><i><abbr title="noun">n.</abbr></i> Small child. (vernacular, South of France)</dd>
+        </dl>
+    </footer>
+</div>
+
+{% endblock %}

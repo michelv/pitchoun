@@ -2,14 +2,17 @@
 
 namespace AppBundle\Controller;
 
+use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Templating\EngineInterface;
 
 use AppBundle\Exception\UrlNotFoundException;
+use AppBundle\Form\MinifyType;
 use AppBundle\Service\Shortener;
 
 class WebController
@@ -25,31 +28,82 @@ class WebController
     protected $templating;
 
     /**
+     * @var FormFactoryInterface
+     */
+    protected $formFactory;
+
+    /**
+     * @var SessionInterface
+     */
+    protected $session;
+
+    /**
      * @var Shortener
      */
     protected $shortener;
 
     /**
-     * @param Shortener $shortener
-     * @param string $baseRedirectionUrl
+     * @var string
      */
-    public function __construct(RouterInterface $router, EngineInterface $templating, Shortener $shortener)
+    protected $baseRedirectionUrl;
+
+    /**
+     * @param RouterInterface $router
+     * @param EngineInterface $templating
+     * @param FormFactoryInterface $formFactory
+     * @param SessionInterface $session
+     * @param Shortener $shortener
+     */
+    public function __construct(RouterInterface $router, EngineInterface $templating, FormFactoryInterface $formFactory, SessionInterface $session, Shortener $shortener, $baseRedirectionUrl)
     {
         $this->router = $router;
         $this->templating = $templating;
+        $this->formFactory = $formFactory;
+        $this->session = $session;
         $this->shortener = $shortener;
+        $this->baseRedirectionUrl = $baseRedirectionUrl;
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return Response
      */
     public function indexAction(Request $request)
     {
-        // replace this example code with whatever you need
-        return $this->templating->renderResponse('default/index.html.twig', [
-            'base_dir' => 'somewhere on your drive I guess?',
+        $form = $this->formFactory->create(MinifyType::class);
+
+        return $this->templating->renderResponse('web/index.html.twig', [
+            'form' => $form->createView(),
+            'uri' => $request->get('uri'),
+            'original' => $request->get('original'),
+            'baseRedirectionUrl' => $this->baseRedirectionUrl,
         ]);
+    }
+
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     */
+    public function shortenAction(Request $request)
+    {
+        $form = $this->formFactory->create(MinifyType::class);
+        $form->handleRequest($request);
+        $params = [];
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            $data = $form->getData();
+
+            try {
+                $shortUrl = $this->shortener->getShortUrl($data['url']);
+                $params = ['uri' => $shortUrl->shortUri, 'original' => $shortUrl->original];
+            } catch (\InvalidArgumentException $e) {
+                $this->session->getFlashBag()->add('error', 'Invalid URL.');
+            }
+        } else {
+            $this->session->getFlashBag()->add('error', 'Hidden monsters have eaten your request. Please try again.');
+        }
+
+        return new RedirectResponse($this->router->generate('web_index', $params), 302);
     }
 
     /**

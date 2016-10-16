@@ -7,6 +7,10 @@ web_index:
     path: /
     methods: ["GET"]
     defaults: { _controller: app.web_controller:indexAction }
+web_shorten:
+    path: /
+    methods: ["POST"]
+    defaults: { _controller: app.web_controller:shortenAction }
 api_shorten:
     path: /api/shorten
     methods: ["GET", "POST"]
