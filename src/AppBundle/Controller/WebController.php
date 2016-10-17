@@ -70,6 +70,8 @@ class WebController
     }
 
     /**
+     * Main page, displays our form.
+     *
      * @param Request $request
      * @return Response
      */
@@ -86,6 +88,9 @@ class WebController
     }
 
     /**
+     * Shorten a URL, then redirect to the main page.
+     * Errors are listed in the session's flashbag.
+     *
      * @param Request $request
      * @return RedirectResponse
      */
@@ -114,6 +119,10 @@ class WebController
     }
 
     /**
+     * Redirects a visitor from the shortened URL to the original one.
+     * Fires a VisitorEvent that may be handled to track visits.
+     * Returns HTTP 404 in case the given URL is not found in the database.
+     *
      * @param Request $request
      * @return JsonResponse
      */

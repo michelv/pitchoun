@@ -38,6 +38,9 @@ class ApiController
     }
 
     /**
+     * Given a URL, returns an object with a shortened URL.
+     * Returns HTTP 400 in case of an invalid URL.
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -67,6 +70,10 @@ class ApiController
     }
 
     /**
+     * Given a shortened URL, returns an object with the original URL.
+     * Returns HTTP 400 in case the given URL is not shortened.
+     * Returns HTTP 404 in case the given URL is not found in the database.
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -103,6 +110,8 @@ class ApiController
     }
 
     /**
+     * Returns an object with an error message
+     *
      * @param string $message
      * @param int $http_code
      * @return JsonResponse

@@ -4,6 +4,9 @@ namespace AppBundle\Service;
 
 use Predis;
 
+/**
+ * Provides unique URIs for the Shortener service.
+ */
 class UriProvider
 {
     /**
@@ -27,6 +30,8 @@ class UriProvider
     }
 
     /**
+     * Returns a new unique URI.
+     *
      * @return string
      */
     public function getNextUri()

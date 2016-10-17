@@ -10,6 +10,9 @@ use AppBundle\Exception\UrlNotFoundException;
 use AppBundle\Service\UriProvider;
 use AppBundle\Url;
 
+/**
+ * Shortens/lengthens URLs.
+ */
 class Shortener
 {
     /**
@@ -37,6 +40,9 @@ class Shortener
      */
     protected $idnaConverter;
 
+    /**
+     * A list of whitelisted URL schemes
+     */
     const VALID_URL_SCHEMES = ['http', 'https', 'ftp'];
 
     /**
@@ -55,6 +61,11 @@ class Shortener
     }
 
     /**
+     * Given a URL, returns a Url object that contains the sanitized version
+     * of the URL, the shortened URL, and the URI of the shortened URL.
+     * Throws an exception if the URL is already shortened.
+     *
+     * @throws UrlAlreadyShortenedException
      * @param string $originalUrl
      * @return Url
      */
@@ -81,6 +92,10 @@ class Shortener
     }
 
     /**
+     * Given a shortened URL, returns a Url object that contains the original
+     * URL, the shortened URL, and the URI of the shortened URL.
+     * Throws an exception if the URL is not found in the database.
+     *
      * @throws UrlNotFoundException
      * @param string $originalUrl
      * @return Url
@@ -100,6 +115,10 @@ class Shortener
     }
 
     /**
+     * Validates and sanitizes URLs.
+     * Returns the sanitized version of the given URL.
+     * Throws an exception if the URL is not valid.
+     *
      * @throws \InvalidArgumentException
      * @param string $originalUrl
      * @return string

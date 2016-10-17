@@ -19,12 +19,19 @@ class VisitorSubscriber implements EventSubscriberInterface
      */
     protected $redisKeyPrefix;
 
+    /**
+     * @param Predis\ClientInterface $redis
+     * @param string $redisKeyPrefix
+     */
     public function __construct(Predis\ClientInterface $redis, $redisKeyPrefix)
     {
         $this->redis = $redis;
         $this->redisKeyPrefix = $redisKeyPrefix;
     }
 
+    /**
+     * @return array
+     */
     public static function getSubscribedEvents()
     {
         return array(
@@ -34,6 +41,11 @@ class VisitorSubscriber implements EventSubscriberInterface
         );
     }
 
+    /**
+     * Tracks a visit by incrementing a counter
+     *
+     * @param VisitorEvent $event
+     */
     public function onVisitorEvent(VisitorEvent $event)
     {
         $request = $event->getRequest();

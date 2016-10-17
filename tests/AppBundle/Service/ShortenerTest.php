@@ -10,6 +10,9 @@ use AppBundle\Exception\UrlNotFoundException;
 use AppBundle\Service\Shortener;
 use AppBundle\Service\UriProvider;
 
+/**
+ * Tests for the Shortener service.
+ */
 class ShortenerTest extends KernelTestCase
 {
     /**
@@ -22,15 +25,9 @@ class ShortenerTest extends KernelTestCase
      */
     public function setUp()
     {
-        static $factory = null;
-        if ($factory === null) {
-            $factory = new RedisMockFactory();
-        }
+        static::bootKernel();
 
-        $redis = $factory->getAdapter('Predis\Client', true);
-
-        $uriProvider = new UriProvider($redis, '');
-        $this->shortener = new Shortener($redis, $uriProvider, 'http://localhost');
+        $this->shortener = static::$kernel->getContainer()->get('shortener');
     }
 
     public function testGetShortUrl()

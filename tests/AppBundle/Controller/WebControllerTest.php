@@ -2,14 +2,14 @@
 
 namespace Tests\AppBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 use AppBundle\Controller\WebController;
 use AppBundle\Exception\UrlNotFoundException;
 
-class WebControllerTest extends KernelTestCase
+class WebControllerTest extends WebTestCase
 {
     /**
      * @var Shortener
@@ -52,12 +52,51 @@ class WebControllerTest extends KernelTestCase
         $this->assertNotFalse(strpos($response->getContent(), '<div id="result"'));
     }
 
+    protected function fillShortenForm($client, $url)
+    {
+        $crawler = $client->request('GET', '/');
+        $this->assertTrue($client->getResponse()->isSuccessful());
+
+        $form = $crawler->selectButton('Minify')->form();
+        $form->setValues(array('minify[url]' => $url));
+        $crawler = $client->submit($form);
+        $response = $client->getResponse();
+        $this->assertTrue($response->isRedirect());
+
+        $crawler = $client->request('GET', $response->getTargetUrl());
+
+        return $crawler;
+    }
+
     public function testShortenAction()
     {
+        $client = static::createClient();
+
+        $crawler = $this->fillShortenForm($client, 'http://a.com/');
+
+        $this->assertGreaterThan(0, $crawler->filter('div#result')->count());
     }
 
     public function testShortenAlreadyShortenedUrl()
     {
+        $client = static::createClient();
+
+        $crawler = $this->fillShortenForm($client, 'http://localhost/42');
+
+        $this->assertEquals(0, $crawler->filter('div#result')->count());
+        $this->assertGreaterThan(0, $crawler->filter('div.flash-error')->count());
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("This URL is already shortened.")')->count());
+    }
+
+    public function testShortenInvalidUrl()
+    {
+        $client = static::createClient();
+
+        $crawler = $this->fillShortenForm($client, 'urn:test');
+
+        $this->assertEquals(0, $crawler->filter('div#result')->count());
+        $this->assertGreaterThan(0, $crawler->filter('div.flash-error')->count());
+        $this->assertGreaterThan(0, $crawler->filter('html:contains("Invalid URL.")')->count());
     }
 
     public function testShortenWithoutPost()
