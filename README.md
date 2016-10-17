@@ -31,8 +31,8 @@ curl -s "http://yourdomain.test/api/shorten?url=http://www.example.com/"
 To get the original URL from a short URL:
 
 ```sh
-curl -s "http://yourdomain.test/api/lengthen?url=http://www.example.com/"
-# {"url":"http:\/\/yourdomain.test\/1"}
+curl -s "http://yourdomain.test/api/lengthen?url=http://yourdomain.test/1"
+# {"url":"http:\/\/www.example.com\/"}
 ```
 
 [ico-travis]: https://api.travis-ci.org/michelv/pitchoun.svg?branch=master
