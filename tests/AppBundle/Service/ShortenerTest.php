@@ -101,7 +101,8 @@ class ShortenerTest extends KernelTestCase
         return array(
             array('http://a.com/', 'http://a.com/'),
             array('http://user:pass@a.com/', 'http://user:pass@a.com/'),
-            array('http://user@a.com/', 'http://user:@a.com/'),
+            array('http://user@a.com/', 'http://user@a.com/'),
+            array('ftp://user@a.com/', 'ftp://user@a.com/'),
             array('a.com/', 'http://a.com/'),
             array('http://a.com:8000/', 'http://a.com:8000/'),
         );

@@ -2,8 +2,8 @@
 
 namespace AppBundle\Service;
 
-use Mso\IdnaConvert\IdnaConvert;
 use Predis;
+use League\Uri;
 
 use AppBundle\Exception\UrlAlreadyShortenedException;
 use AppBundle\Exception\UrlNotFoundException;
@@ -36,9 +36,14 @@ class Shortener
     protected $redisKeyPrefix;
 
     /**
-     * @var IdnaConvert
+     * @var Uri\UriParser
      */
-    protected $idnaConverter;
+    protected $uriParser;
+
+    /**
+     * @var Uri\Formatter
+     */
+    protected $uriFormatter;
 
     /**
      * A list of whitelisted URL schemes
@@ -57,7 +62,9 @@ class Shortener
         $this->uriProvider = $uriProvider;
         $this->baseRedirectionUrl = $baseRedirectionUrl;
         $this->redisKeyPrefix = $redisKeyPrefix;
-        $this->idnaConverter = new IdnaConvert();
+        $this->uriParser = new Uri\UriParser();
+        $this->uriFormatter = new Uri\Formatter();
+        $this->uriFormatter->setHostEncoding(Uri\Formatter::HOST_AS_ASCII);
     }
 
     /**
@@ -71,10 +78,10 @@ class Shortener
      */
     public function getShortUrl($originalUrl)
     {
-        $originalUrl = $this->sanitizeUrl($originalUrl);
         if (strpos($originalUrl, $this->baseRedirectionUrl) !== false) {
             throw new UrlAlreadyShortenedException('Already shortened.');
         }
+        $originalUrl = $this->sanitizeUrl($originalUrl);
 
         $key = sprintf('%sshort:%s', $this->redisKeyPrefix, $originalUrl);
 
@@ -129,44 +136,25 @@ class Shortener
             $originalUrl = 'http://'.$originalUrl;
         }
 
+        $parts = $this->uriParser->parse($originalUrl);
         if (
-            !filter_var($originalUrl, FILTER_VALIDATE_URL)
-            && !filter_var($this->idnaConverter->encodeUri($originalUrl), FILTER_VALIDATE_URL)
+            !in_array(strtolower($parts['scheme']), static::VALID_URL_SCHEMES)
+            || !isset($parts['host'])
         ) {
-            throw new \InvalidArgumentException('Invalid URL1.');
+            throw new \InvalidArgumentException('Invalid URL.');
         }
 
-        $parts = parse_url(trim($originalUrl));
-
-        if (!in_array(strtolower($parts['scheme']), static::VALID_URL_SCHEMES) || !isset($parts['host'])) {
-            throw new \InvalidArgumentException('Invalid URL2.');
+        $host = new Uri\Components\Host($parts['host']);
+        if (!$host->isIp() && !$host->isPublicSuffixValid()) {
+            throw new \InvalidArgumentException('Invalid URL.');
         }
 
-        $credentials = '';
-        if (isset($parts['user'])) {
-            $credentials = $parts['user'].':';
-            if (isset($parts['pass'])) {
-                $credentials .= $parts['pass'];
-            }
+        if ($parts['scheme'] == 'ftp') {
+            $uri = Uri\Schemes\Ftp::createFromComponents($parts);
+        } else {
+            $uri = Uri\Schemes\Http::createFromComponents($parts);
         }
 
-        try {
-            $host = $this->idnaConverter->encode($parts['host']);
-        } catch (\InvalidArgumentException $e) {
-            $host = $parts['host'];
-        }
-
-        $sanitizedUrl = sprintf(
-            '%s://%s%s%s%s%s%s',
-            strtolower($parts['scheme']),
-            ($credentials !== '' ? $credentials.'@' : ''),
-            $host,
-            (isset($parts['port']) ? ':'.$parts['port'] : ''),
-            (isset($parts['path']) ? $parts['path'] : ''),
-            (isset($parts['query']) ? '?'.$parts['query'] : ''),
-            (isset($parts['fragment']) ? '#'.$parts['fragment'] : '')
-        );
-
-        return $sanitizedUrl;
+        return $this->uriFormatter->format($uri);
     }
 }

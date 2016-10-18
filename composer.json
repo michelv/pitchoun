@@ -26,7 +26,7 @@
         "incenteev/composer-parameter-handler": "^2.0",
         "predis/predis": "^1.1",
         "snc/redis-bundle": "^2.0",
-        "mso/idna-convert": "^1.1"
+        "league/uri": "^4.2"
     },
     "require-dev": {
         "symfony/phpunit-bridge": "^3.0",
