@@ -36,4 +36,4 @@ curl -s "http://yourdomain.test/api/lengthen?url=http://yourdomain.test/1"
 ```
 
 [ico-travis]: https://api.travis-ci.org/michelv/pitchoun.svg?branch=master
-[link-travis]: https://travis-ci.org/nrk/predis
+[link-travis]: https://travis-ci.org/michelv/pitchoun
